@@ -3,6 +3,7 @@ const sizeSlider = document.getElementById('size-slider');
 const depthSlider = document.getElementById('depth-slider');
 const colorToggle = document.getElementById('color-toggle');
 const stereoToggle = document.getElementById('stereo-toggle');
+const autoToggle = document.getElementById('auto-toggle');
 const ctx = canvas.getContext('2d');
 
 let width, height;
@@ -40,6 +41,11 @@ stereoToggle.addEventListener('change', (e) => {
         showColor = false;
         colorToggle.checked = false;
     }
+});
+
+let autoRotate = autoToggle.checked;
+autoToggle.addEventListener('change', (e) => {
+    autoRotate = e.target.checked;
 });
 
 // 16 Vertices of a Tesseract
@@ -253,7 +259,7 @@ function project(v, angles, offset = 0) {
 function draw() {
     ctx.clearRect(0, 0, width, height);
 
-    if (!isDragging) {
+    if (autoRotate && !isDragging) {
         angles[2] += 0.002;
         angles[5] += 0.003;
     }
