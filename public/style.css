@@ -134,7 +134,7 @@ strong {
     color: #0ff;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
     opacity: 0.9;
     white-space: nowrap;
     pointer-events: none;
@@ -196,6 +196,7 @@ strong {
     cursor: pointer;
     outline: none;
     position: relative;
+    margin: 0;
 }
 
 .toggle-item input[type="checkbox"]:checked {
@@ -259,6 +260,20 @@ strong {
 
     .toggles-column {
         padding-top: 20px;
+        flex: 1.5;
+    }
+
+    .toggle-item {
+        flex-direction: row;
+        justify-content: flex-start;
+        height: 30px;
+    }
+
+    .toggle-item label {
+        margin-bottom: 0;
+        margin-right: 10px;
+        width: 45px;
+        text-align: right;
     }
     
     #ui {
