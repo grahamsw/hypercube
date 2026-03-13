@@ -22,13 +22,15 @@
             <input type="range" id="depth-slider" min="1.5" max="5.0" step="0.05" value="2.8">
             <label for="depth-slider">Perspective</label>
         </div>
-        <div class="toggle-group">
-            <input type="checkbox" id="color-toggle" checked>
-            <label for="color-toggle">Color</label>
-        </div>
-        <div class="toggle-group">
-            <input type="checkbox" id="stereo-toggle">
-            <label for="stereo-toggle">3D</label>
+        <div class="toggles-column">
+            <div class="toggle-item">
+                <input type="checkbox" id="color-toggle" checked>
+                <label for="color-toggle">Color</label>
+            </div>
+            <div class="toggle-item">
+                <input type="checkbox" id="stereo-toggle">
+                <label for="stereo-toggle">3D</label>
+            </div>
         </div>
     </div>
     <canvas id="hypercube"></canvas>

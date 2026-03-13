@@ -59,20 +59,38 @@ strong {
     flex-direction: row;
     align-items: stretch;
     background: rgba(10, 20, 40, 0.8);
-    padding: 40px 10px 10px 10px; /* Extra top padding for labels */
+    padding: 40px 10px 10px 10px;
     border-radius: 20px;
     border: 1px solid rgba(0, 255, 255, 0.2);
     box-shadow: 0 4px 20px rgba(0,0,0,0.6);
     height: 250px;
 }
 
-.slider-group, .toggle-group {
+.slider-group {
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
     width: 50px;
     height: 100%;
+}
+
+.toggles-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    width: 60px;
+    padding-bottom: 20px;
+}
+
+.toggle-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    height: 50%;
 }
 
 .slider-group input[type="range"] {
@@ -120,7 +138,7 @@ strong {
     box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
 }
 
-.toggle-group input[type="checkbox"] {
+.toggle-item input[type="checkbox"] {
     appearance: none;
     -webkit-appearance: none;
     width: 18px;
@@ -129,19 +147,16 @@ strong {
     border: 1px solid rgba(0, 255, 255, 0.5);
     border-radius: 3px;
     cursor: pointer;
-    position: absolute;
-    top: 55%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: relative;
     outline: none;
 }
 
-.toggle-group input[type="checkbox"]:checked {
+.toggle-item input[type="checkbox"]:checked {
     background: #0ff;
     box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
 }
 
-.toggle-group input[type="checkbox"]:checked::after {
+.toggle-item input[type="checkbox"]:checked::after {
     content: '✔';
     font-size: 12px;
     color: #000;
@@ -157,13 +172,16 @@ strong {
     text-transform: uppercase;
     letter-spacing: 1px;
     position: absolute;
-    top: -25px; /* Relative to the group top */
     width: 100%;
     text-align: center;
     opacity: 0.9;
     white-space: nowrap;
 }
 
-.toggle-group label {
-    top: 42% !important; /* Move color label down just above the checkbox */
+.slider-group label {
+    top: -25px;
+}
+
+.toggle-item label {
+    top: -15px;
 }
