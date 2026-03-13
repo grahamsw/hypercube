@@ -183,6 +183,47 @@ strong {
     top: -25px;
 }
 
-.toggle-item label {
-    top: -20px; /* Slightly more gap above checkbox */
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    #controls {
+        right: 0;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        transform: none;
+        flex-direction: row;
+        width: 100%;
+        height: auto;
+        min-height: 120px;
+        border-radius: 20px 20px 0 0;
+        padding: 40px 10px 20px 10px;
+        box-sizing: border-box;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    .slider-group, .toggles-column {
+        width: auto;
+        flex: 1;
+        height: 100px;
+        margin: 0 5px;
+    }
+
+    .slider-group input[type="range"] {
+        width: 120px;
+        top: 60%;
+    }
+
+    .toggles-column {
+        padding-top: 20px;
+    }
+    
+    #ui {
+        padding: 10px;
+        font-size: 0.8rem;
+    }
+
+    #ui h1 {
+        font-size: 1rem;
+    }
 }

@@ -150,6 +150,47 @@ window.addEventListener('mousemove', (e) => {
     }
 });
 
+// Touch support
+canvas.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    const touch = e.touches[0];
+    previousMousePosition = { x: touch.clientX, y: touch.clientY };
+    // Prevent scrolling while interacting
+    e.preventDefault();
+}, { passive: false });
+
+window.addEventListener('touchend', () => {
+    isDragging = false;
+});
+
+window.addEventListener('touchmove', (e) => {
+    if (isDragging) {
+        const touch = e.touches[0];
+        let deltaX = touch.clientX - previousMousePosition.x;
+        let deltaY = touch.clientY - previousMousePosition.y;
+        
+        const rotationSpeed = 0.005;
+        const numTouches = e.touches.length;
+
+        if (numTouches === 2) {
+            // 2 fingers = Shift (XW/YW)
+            angles[2] += deltaX * rotationSpeed;
+            angles[4] += deltaY * rotationSpeed;
+        } else if (numTouches >= 3) {
+            // 3+ fingers = Alt (XZ/ZW)
+            angles[1] += deltaX * rotationSpeed;
+            angles[5] += deltaY * rotationSpeed;
+        } else {
+            // 1 finger = Normal (XY/YZ)
+            angles[0] += deltaX * rotationSpeed;
+            angles[3] += deltaY * rotationSpeed;
+        }
+
+        previousMousePosition = { x: touch.clientX, y: touch.clientY };
+        e.preventDefault();
+    }
+}, { passive: false });
+
 function applyRotations(v, angles) {
     let [x, y, z, w] = v;
     let temp1, temp2;
