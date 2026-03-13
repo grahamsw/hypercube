@@ -15,6 +15,14 @@
     </div>
     <div id="controls">
         <div class="slider-group">
+            <select id="shape-select">
+                <option value="tesseract">Tesseract (8-Cell)</option>
+                <option value="pentachoron">Pentachoron (5-Cell)</option>
+                <option value="orthoplex">Orthoplex (16-Cell)</option>
+            </select>
+            <label for="shape-select">Shape</label>
+        </div>
+        <div class="slider-group">
             <input type="range" id="size-slider" min="0.2" max="10.0" step="0.05" value="4.0">
             <label for="size-slider">Scale</label>
         </div>
@@ -38,6 +46,6 @@
         </div>
     </div>
     <canvas id="hypercube"></canvas>
-    <script src="script.js?v=8"></script>
+    <script src="script.js?v=9"></script>
 </body>
 </html>
