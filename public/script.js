@@ -27,6 +27,10 @@ depthSlider.addEventListener('input', (e) => {
 let showColor = colorToggle.checked;
 colorToggle.addEventListener('change', (e) => {
     showColor = e.target.checked;
+    if (showColor) {
+        showStereo = false;
+        stereoToggle.checked = false;
+    }
 });
 
 let showStereo = stereoToggle.checked;
