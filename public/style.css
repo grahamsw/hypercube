@@ -116,17 +116,28 @@ strong {
     align-items: center;
     justify-content: space-around;
     width: 60px;
-    padding-top: 55px; 
-    padding-bottom: 30px;
+    padding-top: 40px; 
+    padding-bottom: 20px;
 }
 
 .toggle-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
+    justify-content: center;
     width: 100%;
     height: 33.3%;
+}
+
+.toggle-item label {
+    font-size: 0.55rem;
+    color: #0ff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    opacity: 0.9;
+    white-space: nowrap;
+    pointer-events: none;
 }
 
 .slider-group input[type="range"] {
@@ -183,11 +194,8 @@ strong {
     border: 1px solid rgba(0, 255, 255, 0.5);
     border-radius: 3px;
     cursor: pointer;
-    position: absolute;
-    bottom: 25px; /* Higher up */
-    left: 50%;
-    transform: translateX(-50%);
     outline: none;
+    position: relative;
 }
 
 .toggle-item input[type="checkbox"]:checked {
@@ -205,24 +213,17 @@ strong {
     transform: translate(-50%, -50%);
 }
 
-#controls label {
+.slider-group label {
     font-size: 0.55rem;
     color: #0ff;
     text-transform: uppercase;
     letter-spacing: 1px;
     position: absolute;
+    top: -25px;
     width: 100%;
     text-align: center;
     opacity: 0.9;
     white-space: nowrap;
-}
-
-.slider-group label {
-    top: -25px;
-}
-
-.toggle-item label {
-    top: 30px; /* Lower down */
 }
 
 /* Mobile responsiveness */
