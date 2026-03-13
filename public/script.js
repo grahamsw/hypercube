@@ -17,9 +17,9 @@ sizeSlider.addEventListener('input', (e) => {
     scaleFactor = parseFloat(e.target.value);
 });
 
-let perspectiveDepth = parseFloat(depthSlider.value);
+let perspectiveDepth = 6.5 - parseFloat(depthSlider.value);
 depthSlider.addEventListener('input', (e) => {
-    perspectiveDepth = parseFloat(e.target.value);
+    perspectiveDepth = 6.5 - parseFloat(e.target.value);
 });
 
 // 16 Vertices of a Tesseract
