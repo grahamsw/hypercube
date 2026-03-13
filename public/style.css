@@ -163,3 +163,7 @@ strong {
     opacity: 0.9;
     white-space: nowrap;
 }
+
+.toggle-group label {
+    top: 42% !important; /* Move color label down just above the checkbox */
+}
