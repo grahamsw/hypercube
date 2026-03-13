@@ -2,6 +2,7 @@ const canvas = document.getElementById('hypercube');
 const sizeSlider = document.getElementById('size-slider');
 const depthSlider = document.getElementById('depth-slider');
 const colorToggle = document.getElementById('color-toggle');
+const stereoToggle = document.getElementById('stereo-toggle');
 const ctx = canvas.getContext('2d');
 
 let width, height;
@@ -26,6 +27,15 @@ depthSlider.addEventListener('input', (e) => {
 let showColor = colorToggle.checked;
 colorToggle.addEventListener('change', (e) => {
     showColor = e.target.checked;
+});
+
+let showStereo = stereoToggle.checked;
+stereoToggle.addEventListener('change', (e) => {
+    showStereo = e.target.checked;
+    if (showStereo) {
+        showColor = false;
+        colorToggle.checked = false;
+    }
 });
 
 // 16 Vertices of a Tesseract
@@ -174,6 +184,27 @@ function applyRotations(v, angles) {
     return [x, y, z, w];
 }
 
+function project(v, angles, offset = 0) {
+    let [x, y, z, w] = applyRotations(v, angles);
+    
+    // Add horizontal offset for stereoscopic view
+    x += offset;
+
+    const distance4D = perspectiveDepth; 
+    const w_factor = 1 / (distance4D - w);
+    let x3 = x * w_factor, y3 = y * w_factor, z3 = z * w_factor;
+
+    const distance3D = perspectiveDepth;
+    const z_factor = 1 / (distance3D - z3);
+    let x2 = x3 * z_factor, y2 = y3 * z_factor;
+
+    const baseScale = (Math.min(width, height) / 4) * scaleFactor * (perspectiveDepth * perspectiveDepth / 8);
+    let px = x2 * baseScale + width / 2;
+    let py = y2 * baseScale + height / 2;
+    
+    return { px, py, z3, w, z_factor, w_factor };
+}
+
 function draw() {
     ctx.clearRect(0, 0, width, height);
 
@@ -182,45 +213,43 @@ function draw() {
         angles[5] += 0.003;
     }
 
-    const projectedVertices = [];
-    const baseScale = (Math.min(width, height) / 4) * scaleFactor * (perspectiveDepth * perspectiveDepth / 8);
-
-    for (let i = 0; i < vertices.length; i++) {
-        let v = applyRotations(vertices[i], angles);
-        let x = v[0], y = v[1], z = v[2], w = v[3];
-
-        const distance4D = perspectiveDepth; 
-        const w_factor = 1 / (distance4D - w);
-        let x3 = x * w_factor, y3 = y * w_factor, z3 = z * w_factor;
-
-        const distance3D = perspectiveDepth;
-        const z_factor = 1 / (distance3D - z3);
-        let x2 = x3 * z_factor, y2 = y3 * z_factor;
-
-        let px = x2 * baseScale + width / 2;
-        let py = y2 * baseScale + height / 2;
-        projectedVertices.push({ px, py, z3, w, z_factor, w_factor });
+    if (showStereo) {
+        // Render Red (Left Eye)
+        renderScene(-0.05, "rgba(255, 0, 0, 0.7)");
+        // Render Cyan/Green (Right Eye)
+        ctx.globalCompositeOperation = "screen";
+        renderScene(0.05, "rgba(0, 255, 255, 0.7)");
+        ctx.globalCompositeOperation = "source-over";
+    } else {
+        renderScene(0, "rgba(0, 255, 255, 1.0)");
     }
 
-    // Sort cells by average depth (Painter's algorithm)
-    const sortedCells = cells.map((cell) => {
-        let avgDepth = 0;
-        let count = 0;
-        for (let i = 0; i < 16; i++) {
-            if (vertices[i][cell.fixed[0]] === cell.fixed[1]) {
-                avgDepth += projectedVertices[i].z3;
-                count++;
-            }
-        }
-        return { ...cell, avgDepth: avgDepth / count };
-    }).sort((a, b) => a.avgDepth - b.avgDepth);
+    requestAnimationFrame(draw);
+}
 
-    // Draw cells (faces)
-    if (showColor) {
+function renderScene(offset, edgeColor) {
+    const projectedVertices = [];
+    for (let i = 0; i < vertices.length; i++) {
+        projectedVertices.push(project(vertices[i], angles, offset));
+    }
+
+    if (showColor && offset === 0) {
+        // Sort cells by average depth (Painter's algorithm)
+        const sortedCells = cells.map((cell) => {
+            let avgDepth = 0;
+            let count = 0;
+            for (let i = 0; i < 16; i++) {
+                if (vertices[i][cell.fixed[0]] === cell.fixed[1]) {
+                    avgDepth += projectedVertices[i].z3;
+                    count++;
+                }
+            }
+            return { ...cell, avgDepth: avgDepth / count };
+        }).sort((a, b) => a.avgDepth - b.avgDepth);
+
         sortedCells.forEach(cell => {
             ctx.fillStyle = cell.color;
             tesseractFaces.forEach(face => {
-                // A face belongs to a cell if all its vertices belong to the cell
                 const isFaceInCell = face.vertices.every(vIdx => {
                     return vertices[vIdx][cell.fixed[0]] === cell.fixed[1];
                 });
@@ -251,12 +280,10 @@ function draw() {
         let alpha = (avgW + 2.5) / 4;
         alpha = Math.max(0.3, Math.min(1.0, alpha));
         
-        ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
+        ctx.strokeStyle = showStereo ? edgeColor : `rgba(0, 255, 255, ${alpha})`;
         ctx.lineWidth = Math.max(0.8, 2.5 * alpha);
         ctx.stroke();
     }
-
-    requestAnimationFrame(draw);
 }
 
 draw();
