@@ -1,6 +1,7 @@
 const canvas = document.getElementById('hypercube');
 const sizeSlider = document.getElementById('size-slider');
 const depthSlider = document.getElementById('depth-slider');
+const colorToggle = document.getElementById('color-toggle');
 const ctx = canvas.getContext('2d');
 
 let width, height;
@@ -20,6 +21,11 @@ sizeSlider.addEventListener('input', (e) => {
 let perspectiveDepth = 6.5 - parseFloat(depthSlider.value);
 depthSlider.addEventListener('input', (e) => {
     perspectiveDepth = 6.5 - parseFloat(e.target.value);
+});
+
+let showColor = colorToggle.checked;
+colorToggle.addEventListener('change', (e) => {
+    showColor = e.target.checked;
 });
 
 // 16 Vertices of a Tesseract
@@ -210,25 +216,27 @@ function draw() {
     }).sort((a, b) => a.avgDepth - b.avgDepth);
 
     // Draw cells (faces)
-    sortedCells.forEach(cell => {
-        ctx.fillStyle = cell.color;
-        tesseractFaces.forEach(face => {
-            // A face belongs to a cell if all its vertices belong to the cell
-            const isFaceInCell = face.vertices.every(vIdx => {
-                return vertices[vIdx][cell.fixed[0]] === cell.fixed[1];
-            });
+    if (showColor) {
+        sortedCells.forEach(cell => {
+            ctx.fillStyle = cell.color;
+            tesseractFaces.forEach(face => {
+                // A face belongs to a cell if all its vertices belong to the cell
+                const isFaceInCell = face.vertices.every(vIdx => {
+                    return vertices[vIdx][cell.fixed[0]] === cell.fixed[1];
+                });
 
-            if (isFaceInCell) {
-                ctx.beginPath();
-                ctx.moveTo(projectedVertices[face.vertices[0]].px, projectedVertices[face.vertices[0]].py);
-                for (let i = 1; i < 4; i++) {
-                    ctx.lineTo(projectedVertices[face.vertices[i]].px, projectedVertices[face.vertices[i]].py);
+                if (isFaceInCell) {
+                    ctx.beginPath();
+                    ctx.moveTo(projectedVertices[face.vertices[0]].px, projectedVertices[face.vertices[0]].py);
+                    for (let i = 1; i < 4; i++) {
+                        ctx.lineTo(projectedVertices[face.vertices[i]].px, projectedVertices[face.vertices[i]].py);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
                 }
-                ctx.closePath();
-                ctx.fill();
-            }
+            });
         });
-    });
+    }
 
     // Draw edges
     for (let i = 0; i < edges.length; i++) {
