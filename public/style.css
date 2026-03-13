@@ -81,7 +81,7 @@ strong {
     align-items: center;
     justify-content: space-around;
     width: 60px;
-    padding-top: 30px; /* Move column down to avoid label overlap */
+    padding-top: 65px; /* Further down to align labels below slider tops */
     padding-bottom: 20px;
 }
 
@@ -184,5 +184,5 @@ strong {
 }
 
 .toggle-item label {
-    top: -15px;
+    top: -20px; /* Slightly more gap above checkbox */
 }
