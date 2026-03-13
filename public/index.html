@@ -12,16 +12,16 @@
         <p><strong>Drag:</strong> Rotate XY / YZ planes (3D)</p>
         <p><strong>Shift + Drag:</strong> Rotate XW / YW planes (4D)</p>
         <p><strong>Alt + Drag:</strong> Rotate XZ / ZW planes (4D)</p>
-    </div>
-    <div id="controls">
-        <div class="slider-group">
+        <div class="shape-selector-container">
+            <label for="shape-select">Select Shape:</label>
             <select id="shape-select">
                 <option value="tesseract">Tesseract (8-Cell)</option>
                 <option value="pentachoron">Pentachoron (5-Cell)</option>
                 <option value="orthoplex">Orthoplex (16-Cell)</option>
             </select>
-            <label for="shape-select">Shape</label>
         </div>
+    </div>
+    <div id="controls">
         <div class="slider-group">
             <input type="range" id="size-slider" min="0.2" max="10.0" step="0.05" value="4.0">
             <label for="size-slider">Scale</label>
