@@ -1,5 +1,6 @@
 const canvas = document.getElementById('hypercube');
 const sizeSlider = document.getElementById('size-slider');
+const depthSlider = document.getElementById('depth-slider');
 const ctx = canvas.getContext('2d');
 
 let width, height;
@@ -14,6 +15,11 @@ resize();
 let scaleFactor = parseFloat(sizeSlider.value);
 sizeSlider.addEventListener('input', (e) => {
     scaleFactor = parseFloat(e.target.value);
+});
+
+let perspectiveDepth = parseFloat(depthSlider.value);
+depthSlider.addEventListener('input', (e) => {
+    perspectiveDepth = parseFloat(e.target.value);
 });
 
 // 16 Vertices of a Tesseract
@@ -143,7 +149,7 @@ function draw() {
         let w = v[3];
 
         // 4D to 3D Stereographic Projection
-        const distance4D = 2.8; 
+        const distance4D = perspectiveDepth; 
         const w_factor = 1 / (distance4D - w);
         
         let x3 = x * w_factor;
@@ -151,7 +157,7 @@ function draw() {
         let z3 = z * w_factor;
 
         // 3D to 2D Perspective Projection
-        const distance3D = 2.8;
+        const distance3D = perspectiveDepth;
         const z_factor = 1 / (distance3D - z3);
         
         let x2 = x3 * z_factor;
