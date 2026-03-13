@@ -137,8 +137,9 @@ function draw() {
 
     const projectedVertices = [];
 
-    // Scale down the 4D object space
-    const baseScale = (Math.min(width, height) / 4) * scaleFactor;
+    // Scale down the 4D object space and compensate for perspective depth
+    // The projection factor is roughly 1/depth^2, so we multiply by depth^2 to maintain size
+    const baseScale = (Math.min(width, height) / 4) * scaleFactor * (perspectiveDepth * perspectiveDepth / 8);
 
     for (let i = 0; i < vertices.length; i++) {
         let v = applyRotations(vertices[i], angles);
