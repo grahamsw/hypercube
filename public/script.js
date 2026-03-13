@@ -32,6 +32,51 @@ for (let i = 0; i < 16; i++) {
     vertices.push([x, y, z, w]);
 }
 
+// 8 Cells (Cubes) of a Tesseract, each defined by a fixed coordinate
+const cells = [
+    { name: "x-min", color: "rgba(255, 100, 100, 0.15)", fixed: [0, -1] },
+    { name: "x-max", color: "rgba(100, 255, 100, 0.15)", fixed: [0, 1] },
+    { name: "y-min", color: "rgba(100, 100, 255, 0.15)", fixed: [1, -1] },
+    { name: "y-max", color: "rgba(255, 255, 100, 0.15)", fixed: [1, 1] },
+    { name: "z-min", color: "rgba(100, 255, 255, 0.15)", fixed: [2, -1] },
+    { name: "z-max", color: "rgba(255, 100, 255, 0.15)", fixed: [2, 1] },
+    { name: "w-min", color: "rgba(255, 180, 100, 0.15)", fixed: [3, -1] },
+    { name: "w-max", color: "rgba(100, 255, 180, 0.15)", fixed: [3, 1] }
+];
+
+// Generate the 24 unique faces of the Tesseract
+function getTesseractFaces() {
+    const f = [];
+    // Each face is defined by fixing TWO coordinates
+    for (let dim1 = 0; dim1 < 4; dim1++) {
+        for (let dim2 = dim1 + 1; dim2 < 4; dim2++) {
+            for (let val1 of [-1, 1]) {
+                for (let val2 of [-1, 1]) {
+                    const faceVertices = [];
+                    const otherDims = [0, 1, 2, 3].filter(d => d !== dim1 && d !== dim2);
+                    const variations = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
+                    for (let v of variations) {
+                        let vert = [0, 0, 0, 0];
+                        vert[dim1] = val1;
+                        vert[dim2] = val2;
+                        vert[otherDims[0]] = v[0];
+                        vert[otherDims[1]] = v[1];
+                        let idx = 0;
+                        if (vert[0] === 1) idx |= 1;
+                        if (vert[1] === 1) idx |= 2;
+                        if (vert[2] === 1) idx |= 4;
+                        if (vert[3] === 1) idx |= 8;
+                        faceVertices.push(idx);
+                    }
+                    f.push({ vertices: faceVertices, fixed: [[dim1, val1], [dim2, val2]] });
+                }
+            }
+        }
+    }
+    return f;
+}
+const tesseractFaces = getTesseractFaces();
+
 // 32 Edges
 const edges = [];
 for (let i = 0; i < 16; i++) {
@@ -71,15 +116,12 @@ window.addEventListener('mousemove', (e) => {
         const rotationSpeed = 0.005;
 
         if (e.shiftKey) {
-            // Shift + Drag = Rotate XW (left/right) and YW (up/down)
             angles[2] += deltaX * rotationSpeed; // XW
             angles[4] += deltaY * rotationSpeed; // YW
         } else if (e.altKey) {
-            // Alt + Drag = Rotate XZ (left/right) and ZW (up/down)
             angles[1] += deltaX * rotationSpeed; // XZ
             angles[5] += deltaY * rotationSpeed; // ZW
         } else {
-            // Normal Drag = Rotate XY (left/right) and YZ (up/down)
             angles[0] += deltaX * rotationSpeed; // XY
             angles[3] += deltaY * rotationSpeed; // YZ
         }
@@ -129,58 +171,64 @@ function applyRotations(v, angles) {
 function draw() {
     ctx.clearRect(0, 0, width, height);
 
-    // Auto-rotate if not interacting to keep it looking "alive"
     if (!isDragging) {
-        angles[2] += 0.002; // Slowly rotate XW
-        angles[5] += 0.003; // Slowly rotate ZW
+        angles[2] += 0.002;
+        angles[5] += 0.003;
     }
 
     const projectedVertices = [];
-
-    // Scale down the 4D object space and compensate for perspective depth
-    // The projection factor is roughly 1/depth^2, so we multiply by depth^2 to maintain size
     const baseScale = (Math.min(width, height) / 4) * scaleFactor * (perspectiveDepth * perspectiveDepth / 8);
 
     for (let i = 0; i < vertices.length; i++) {
         let v = applyRotations(vertices[i], angles);
-        
-        let x = v[0];
-        let y = v[1];
-        let z = v[2];
-        let w = v[3];
+        let x = v[0], y = v[1], z = v[2], w = v[3];
 
-        // 4D to 3D Stereographic Projection
         const distance4D = perspectiveDepth; 
         const w_factor = 1 / (distance4D - w);
-        
-        let x3 = x * w_factor;
-        let y3 = y * w_factor;
-        let z3 = z * w_factor;
+        let x3 = x * w_factor, y3 = y * w_factor, z3 = z * w_factor;
 
-        // 3D to 2D Perspective Projection
         const distance3D = perspectiveDepth;
         const z_factor = 1 / (distance3D - z3);
-        
-        let x2 = x3 * z_factor;
-        let y2 = y3 * z_factor;
+        let x2 = x3 * z_factor, y2 = y3 * z_factor;
 
-        // Convert to canvas coordinates
         let px = x2 * baseScale + width / 2;
         let py = y2 * baseScale + height / 2;
-        
-        projectedVertices.push({ px, py, z3, w });
-
-        // Draw vertex
-        ctx.beginPath();
-        // Point size based on distance for 3D depth cue
-        let radius = Math.max(1, 4 * z_factor * w_factor);
-        ctx.arc(px, py, radius, 0, Math.PI * 2);
-        
-        // Intensity based on W axis (4th dimension)
-        let intensity = Math.floor(((w + 1) / 2) * 150 + 105);
-        ctx.fillStyle = `rgb(${intensity}, ${intensity}, 255)`;
-        ctx.fill();
+        projectedVertices.push({ px, py, z3, w, z_factor, w_factor });
     }
+
+    // Sort cells by average depth (Painter's algorithm)
+    const sortedCells = cells.map((cell) => {
+        let avgDepth = 0;
+        let count = 0;
+        for (let i = 0; i < 16; i++) {
+            if (vertices[i][cell.fixed[0]] === cell.fixed[1]) {
+                avgDepth += projectedVertices[i].z3;
+                count++;
+            }
+        }
+        return { ...cell, avgDepth: avgDepth / count };
+    }).sort((a, b) => a.avgDepth - b.avgDepth);
+
+    // Draw cells (faces)
+    sortedCells.forEach(cell => {
+        ctx.fillStyle = cell.color;
+        tesseractFaces.forEach(face => {
+            // A face belongs to a cell if all its vertices belong to the cell
+            const isFaceInCell = face.vertices.every(vIdx => {
+                return vertices[vIdx][cell.fixed[0]] === cell.fixed[1];
+            });
+
+            if (isFaceInCell) {
+                ctx.beginPath();
+                ctx.moveTo(projectedVertices[face.vertices[0]].px, projectedVertices[face.vertices[0]].py);
+                for (let i = 1; i < 4; i++) {
+                    ctx.lineTo(projectedVertices[face.vertices[i]].px, projectedVertices[face.vertices[i]].py);
+                }
+                ctx.closePath();
+                ctx.fill();
+            }
+        });
+    });
 
     // Draw edges
     for (let i = 0; i < edges.length; i++) {
@@ -191,9 +239,8 @@ function draw() {
         ctx.moveTo(p1.px, p1.py);
         ctx.lineTo(p2.px, p2.py);
         
-        // Fade edges based on 4D distance (W) to simulate 4D depth
         let avgW = (p1.w + p2.w) / 2;
-        let alpha = (avgW + 2.5) / 4; // Shifted range for better visibility
+        let alpha = (avgW + 2.5) / 4;
         alpha = Math.max(0.3, Math.min(1.0, alpha));
         
         ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
@@ -204,5 +251,4 @@ function draw() {
     requestAnimationFrame(draw);
 }
 
-// Start animation loop
 draw();
